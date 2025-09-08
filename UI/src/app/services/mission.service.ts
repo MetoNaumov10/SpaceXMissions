@@ -1,21 +1,26 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { AuthService } from './auth.service';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class MissionService {
-  private base = 'https://localhost:7203/api/mission';
+  private readonly apiUrl = 'https://localhost:7203/mission';
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(private http: HttpClient) {}
 
-  private authHeaders() {
-    const token = this.auth.getToken();
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  getLatest(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/latest`);
   }
 
-  getLatest(): Observable<any> { return this.http.get(`${this.base}/latest`, this.authHeaders()); }
-  getUpcoming(): Observable<any> { return this.http.get(`${this.base}/upcoming`, this.authHeaders()); }
-  getPast(): Observable<any> { return this.http.get(`${this.base}/past`, this.authHeaders()); }
-  getByType(type: string) { return this.http.get(`${this.base}/bytype`, { params: new HttpParams().set('type', type), ...this.authHeaders() }); }
+  getUpcoming(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/upcoming`);
+  }
+
+  getPast(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/past`);
+  }
+
+  getByType(type: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bytype?type=${type}`);
+  }
 }

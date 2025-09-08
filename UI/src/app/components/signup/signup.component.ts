@@ -20,7 +20,8 @@ export class SignupComponent {
 
   submit() {
     if (this.form.invalid) return;
-    this.auth.signup(this.form.value).subscribe({
+    const { firstName, lastName, email, password } = this.form.value;
+    this.auth.signup(firstName, lastName, email, password).subscribe({
       next: _ => this.router.navigate(['/login']),
       error: err => this.error = err.error || 'Signup failed'
     });

@@ -1,0 +1,31 @@
+<h2>Select Mission Type</h2>
+
+<form>
+  <select [formControl]="missionType">
+    <option value="latest">Latest</option>
+    <option value="upcoming">Upcoming</option>
+    <option value="past">Past</option>
+  </select>
+</form>
+
+<hr />
+
+<div *ngIf="missionData">
+  <h3>Mission Results</h3>
+
+  <!-- Single mission for latest -->
+  <div *ngIf="missionType.value === 'latest'">
+    <p><strong>Mission:</strong> {{ missionData.name }}</p>
+    <p><strong>Date:</strong> {{ missionData.date_utc | date }}</p>
+    <p><strong>Details:</strong> {{ missionData.details }}</p>
+  </div>
+
+  <!-- List for upcoming / past -->
+  <div *ngIf="missionType.value !== 'latest'">
+    <ul>
+      <li *ngFor="let mission of missionData">
+        <strong>{{ mission.name }}</strong> — {{ mission.date_utc | date }}
+      </li>
+    </ul>
+  </div>
+</div>
