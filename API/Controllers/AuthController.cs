@@ -45,7 +45,6 @@ namespace API.Controllers
                 PasswordSalt = salt
             };
 
-
             var userId = await _repo.CreateAsync(user);
             return CreatedAtAction(nameof(SignUp), new { id = userId });
         }
