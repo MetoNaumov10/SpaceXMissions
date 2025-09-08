@@ -6,6 +6,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowUI",
+        policy => policy
+            .WithOrigins("http://localhost:4200")  // Angular dev server
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+    );
+});
+
 var configuration = builder.Configuration;
 
 // Add services to the container.
@@ -56,6 +67,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowUI");
 
 app.UseAuthentication();
 app.UseAuthorization();

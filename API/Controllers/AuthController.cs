@@ -28,13 +28,10 @@ namespace API.Controllers
             if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
                 return BadRequest("Email and password are required.");
 
-
             var existing = await _repo.GetByEmailAsync(req.Email);
             if (existing != null) return Conflict("Email already registered.");
 
-
             PasswordHasher.CreatePasswordHash(req.Password, out var hash, out var salt);
-
 
             var user = new User
             {
