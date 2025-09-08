@@ -12,12 +12,12 @@ namespace API.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IUserRepository _repo;
+        private readonly IUserRepository _userRepository;
         private readonly IConfiguration _config;
 
-        public AuthController(IUserRepository repo, IConfiguration config)
+        public AuthController(IUserRepository userRepository, IConfiguration config)
         {
-            _repo = repo;
+            _userRepository = userRepository;
             _config = config;
         }
 
@@ -28,7 +28,7 @@ namespace API.Controllers
             if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
                 return BadRequest("Email and password are required.");
 
-            var existing = await _repo.GetByEmailAsync(req.Email);
+            var existing = await _userRepository.GetByEmailAsync(req.Email);
             if (existing != null) return Conflict("Email already registered.");
 
             PasswordHasher.CreatePasswordHash(req.Password, out var hash, out var salt);
@@ -42,7 +42,7 @@ namespace API.Controllers
                 PasswordSalt = salt
             };
 
-            var userId = await _repo.CreateAsync(user);
+            var userId = await _userRepository.CreateAsync(user);
             return CreatedAtAction(nameof(SignUp), new { id = userId });
         }
 
@@ -51,7 +51,7 @@ namespace API.Controllers
         {
             if (req.Email != null)
             {
-                var user = await _repo.GetByEmailAsync(req.Email);
+                var user = await _userRepository.GetByEmailAsync(req.Email);
                 if (user == null) return Unauthorized("Invalid credentials.");
 
                 if (req.Password != null && user.PasswordHash != null && user.PasswordSalt != null && !PasswordHasher.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt))
