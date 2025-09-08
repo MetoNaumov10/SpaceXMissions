@@ -1,5 +1,4 @@
 ﻿using Models;
-using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -8,8 +7,6 @@ namespace Services
     public class UserRepository(IConfiguration config) : IUserRepository
     {
         private readonly string? _connString = config.GetConnectionString("DefaultConnection");
-
-        private IDbConnection Connection => new SqlConnection(_connString);
 
         public async Task<User?> GetByEmailAsync(string email)
         {
