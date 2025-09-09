@@ -1,4 +1,9 @@
-<h2>Select Mission Type</h2>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h2>Select Mission Type</h2>
+  <button (click)="logout()" style="padding: 6px 12px; cursor: pointer;">
+    Logout
+  </button>
+</div>
 
 <form>
   <select [formControl]="missionType">
@@ -15,16 +20,62 @@
 
   <!-- Single mission for latest -->
   <div *ngIf="missionType.value === 'latest'">
-    <p><strong>Mission:</strong> {{ missionData.name }}</p>
-    <p><strong>Date:</strong> {{ missionData.date_utc | date }}</p>
-    <p><strong>Details:</strong> {{ missionData.details }}</p>
+    <p><strong>Name:</strong> {{ missionData.name }}</p>
+    <p><strong>Flight Number:</strong> {{ missionData.flight_number }}</p>
+    <p><strong>Date (UTC):</strong> {{ missionData.date_utc | date:'medium' }}</p>
+    <p><strong>Success:</strong> {{ missionData.success ? 'Yes' : 'No' }}</p>
+    <p *ngIf="missionData.details"><strong>Details:</strong> {{ missionData.details }}</p>
+
+    <h4>Crew</h4>
+    <ul>
+      <li *ngFor="let member of missionData.crew">
+        {{ member.role }} — {{ member.crew }}
+      </li>
+    </ul>
+
+    <h4>Rocket</h4>
+    <p>{{ missionData.rocket }}</p>
+
+    <h4>Cores</h4>
+    <ul>
+      <li *ngFor="let core of missionData.cores">
+        Core ID: {{ core.core }}, Flight: {{ core.flight }}, Reused: {{ core.reused ? 'Yes' : 'No' }},
+        Landing Attempt: {{ core.landing_attempt ? 'Yes' : 'No' }},
+        Landing Success: {{ core.landing_success ? 'Yes' : 'No' }},
+        Landing Type: {{ core.landing_type }}, Landpad: {{ core.landpad }}
+      </li>
+    </ul>
+
+    <h4>Links</h4>
+    <div *ngIf="missionData.links">
+        <p *ngIf="missionData.links.webcast">
+            <a [href]="missionData.links.webcast" target="_blank">Webcast</a>
+        </p>
+        <p *ngIf="missionData.links.wikipedia">
+            <a [href]="missionData.links.wikipedia" target="_blank">Wikipedia</a>
+        </p>
+        <div *ngIf="missionData.links.patch.small">
+            <img [src]="missionData.links.patch.small" alt="Mission Patch" />
+        </div>
+    </div>
+    
   </div>
 
-  <!-- List for upcoming / past -->
-  <div *ngIf="missionType.value !== 'latest'">
+  <div *ngIf="missionType.value === 'past'">
     <ul>
       <li *ngFor="let mission of missionData">
-        <strong>{{ mission.name }}</strong> — {{ mission.date_utc | date }}
+        <strong>{{ mission.name }}</strong> — Flight #: {{ mission.flight_number }},
+        Date: {{ mission.date_utc | date:'medium' }},
+        Success: {{ mission.success ? 'Yes' : 'No' }}
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="missionType.value === 'upcoming'">
+    <ul>
+      <li *ngFor="let mission of missionData">
+        <strong>{{ mission.name }}</strong> — Flight #: {{ mission.flight_number }},
+        Date: {{ mission.date_utc | date:'medium' }}
       </li>
     </ul>
   </div>

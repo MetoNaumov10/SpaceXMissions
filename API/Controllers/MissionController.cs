@@ -21,7 +21,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetLatest()
         {
             var client = CreateClient();
-            var resp = await client.GetAsync("/launches/latest");
+            var resp = await client.GetAsync("launches/latest");
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");
@@ -32,7 +32,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetUpcoming()
         {
             var client = CreateClient();
-            var resp = await client.GetAsync("/launches/upcoming");
+            var resp = await client.GetAsync("launches/upcoming");
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");
@@ -43,7 +43,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetPast()
         {
             var client = CreateClient();
-            var resp = await client.GetAsync("/launches/past");
+            var resp = await client.GetAsync("launches/past");
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");
@@ -57,9 +57,9 @@ namespace API.Controllers
             var client = CreateClient();
             string? endpoint = type.ToLowerInvariant() switch
             {
-                "latest" => "/launches/latest",
-                "upcoming" => "/launches/upcoming",
-                "past" => "/launches/past",
+                "latest" => "launches/latest",
+                "upcoming" => "launches/upcoming",
+                "past" => "launches/past",
                 _ => null
             };
             if (endpoint == null) return BadRequest("Unknown type. Use latest|upcoming|past");
