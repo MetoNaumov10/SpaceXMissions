@@ -2,20 +2,39 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div>
     <label>First name</label>
-    <input formControlName="firstName" />
+    <input type="text" formControlName="firstName" />
+    <div *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched">
+            First name is required and must be valid.
+    </div>
   </div>
   <div>
     <label>Last name</label>
-    <input formControlName="lastName" />
+    <input type="text" formControlName="lastName" />
+    <div *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched">
+            Last name is required and must be valid.
+    </div>
   </div>
   <div>
     <label>Email</label>
-    <input formControlName="email" />
+    <input type="email" formControlName="email" />
+    <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+            Email is required and must be valid.
+    </div>
   </div>
   <div>
     <label>Password</label>
     <input type="password" formControlName="password" />
+    <div *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+            Password is required and must be valid (min 6 chars).
+    </div>
   </div>
   <div *ngIf="error" style="color:red">{{error}}</div>
-  <button type="submit">Sign Up</button>
+  <button type="submit" [disabled]="form.invalid">Sign Up</button>
 </form>
+
+<p>
+  Already have an account? 
+  <a routerLink="/login" style="color: blue; text-decoration: underline; cursor: pointer;">
+      Return to Login
+  </a>
+</p>
