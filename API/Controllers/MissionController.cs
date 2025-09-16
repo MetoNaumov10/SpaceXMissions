@@ -7,21 +7,18 @@ namespace API.Controllers
     [Route("[controller]")]
     public class MissionController : ControllerBase
     {
-        private readonly IHttpClientFactory _httpFactory;
+        private readonly HttpClient _client;
 
         public MissionController(IHttpClientFactory httpFactory)
         {
-            _httpFactory = httpFactory;
+            _client = httpFactory.CreateClient("spacex");
         }
-
-        private HttpClient CreateClient() => _httpFactory.CreateClient("spacex");
 
         [HttpGet("latest")]
         [Authorize]
         public async Task<IActionResult> GetLatest()
         {
-            var client = CreateClient();
-            var resp = await client.GetAsync("launches/latest");
+            var resp = await _client.GetAsync("launches/latest");
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");
@@ -31,8 +28,7 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> GetUpcoming()
         {
-            var client = CreateClient();
-            var resp = await client.GetAsync("launches/upcoming");
+            var resp = await _client.GetAsync("launches/upcoming");
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");
@@ -42,8 +38,7 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> GetPast()
         {
-            var client = CreateClient();
-            var resp = await client.GetAsync("launches/past");
+            var resp = await _client.GetAsync("launches/past");
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");
@@ -54,7 +49,6 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> GetByType([FromQuery] string type)
         {
-            var client = CreateClient();
             string? endpoint = type.ToLowerInvariant() switch
             {
                 "latest" => "launches/latest",
@@ -63,7 +57,7 @@ namespace API.Controllers
                 _ => null
             };
             if (endpoint == null) return BadRequest("Unknown type. Use latest|upcoming|past");
-            var resp = await client.GetAsync(endpoint);
+            var resp = await _client.GetAsync(endpoint);
             if (!resp.IsSuccessStatusCode) return StatusCode((int)resp.StatusCode, "SpaceX API error");
             var json = await resp.Content.ReadAsStringAsync();
             return Content(json, "application/json");

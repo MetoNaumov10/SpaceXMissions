@@ -49,43 +49,38 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
-            if (req.Email != null)
-            {
-                var user = await _userRepository.GetByEmailAsync(req.Email);
-                if (user == null) return Unauthorized("Invalid credentials.");
+            if (req.Email.IsNullOrEmpty()) return BadRequest("Email is required.");
 
-                if (req.Password != null && user.PasswordHash != null && user.PasswordSalt != null && !PasswordHasher.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt))
-                    return Unauthorized("Invalid credentials.");
+            var user = await _userRepository.GetByEmailAsync(req.Email);
+            if (user == null || req.Password.IsNullOrEmpty() && user is { PasswordHash: not null, PasswordSalt: not null } && !PasswordHasher.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt)) return Unauthorized("Invalid credentials.");
 
-                // create token
-                var jwt = _config.GetSection("Jwt");
-                var key = Encoding.UTF8.GetBytes(jwt.GetValue<string>("Key") ?? string.Empty);
-                var tokenHandler = new JwtSecurityTokenHandler();
+            // create token
+            var jwt = _config.GetSection("Jwt");
+            var key = Encoding.UTF8.GetBytes(jwt.GetValue<string>("Key") ?? string.Empty);
+            var tokenHandler = new JwtSecurityTokenHandler();
 
-                var claims = new[] {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Email!),
-                    new Claim("firstName", user.FirstName!),
-                    new Claim("lastName", user.LastName!)
-                };
+            var claims = new[] {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim("firstName", user.FirstName),
+                new Claim("lastName", user.LastName)
+            };
 
-                var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-                var expires = DateTime.UtcNow.AddMinutes(jwt.GetValue<int>("ExpireMinutes"));
+            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.UtcNow.AddMinutes(jwt.GetValue<int>("ExpireMinutes"));
 
-                var token = new JwtSecurityToken(
-                    issuer: jwt.GetValue<string>("Issuer"),
-                    audience: jwt.GetValue<string>("Audience"),
-                    claims: claims,
-                    expires: expires,
-                    signingCredentials: creds
-                );
+            var token = new JwtSecurityToken(
+                issuer: jwt.GetValue<string>("Issuer"),
+                audience: jwt.GetValue<string>("Audience"),
+                claims: claims,
+                expires: expires,
+                signingCredentials: credentials
+            );
 
-                var tokenString = tokenHandler.WriteToken(token);
+            var tokenString = tokenHandler.WriteToken(token);
 
-                return Ok(new AuthResponse { Token = tokenString, ExpiresAt = expires });
-            }
+            return Ok(new AuthResponse { Token = tokenString, ExpiresAt = expires });
 
-            return BadRequest("Email is required.");
         }
     }
 }
